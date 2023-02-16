@@ -5,8 +5,8 @@ import type { Ref } from 'vue';
 
 import { ref } from 'vue';
 
-const binWidth: Ref<number> = ref(1200);
-const binHeight: Ref<number> = ref(200);
+const binWidth: Ref<number> = ref(1360);
+const binHeight: Ref<number> = ref(245);
 
 const boxes: Ref<{ width: number; height: number }[]> = ref([
   { width: 100, height: 100 }

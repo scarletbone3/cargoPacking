@@ -47,5 +47,6 @@ export const binPack = (
     y: node.y || 0,
     fill: colors[`${node.width}_${node.height}`] || 'pink',
     stroke: 'grey',
+    strokeWidth: 1,
   }));
 }

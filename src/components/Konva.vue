@@ -6,6 +6,7 @@ import { ref, computed } from 'vue';
 
 import { pack } from '@/compositions/Pack';
 import { binPack } from '@/compositions/BinPack';
+import { load } from '@/compositions/PalletPack';
 
 export interface Box {
   width: number;
@@ -30,6 +31,12 @@ const quantityModel: Ref<Record<string, number>> = ref(
     acc[`${i.width}_${i.height}`] = 0;
     return acc
   }, {}) || {}
+);
+const allowRotationModel: Ref<Record<string, boolean>> = ref(
+  props.boxes?.reduce<Record<string, boolean>>((acc, i) => {
+    acc[`${i.width}_${i.height}`] = false;
+    return acc;
+  }, {})
 );
 
 const selectionStrategyOptions: Ref<{ value: string; label: string }[]> = ref([
@@ -183,10 +190,55 @@ const rectConfigsB: ComputedRef<RectangleConfig[]> = computed(() => {
     sortDirectionModel.value,
   );
 })
+
+const centerLoading: Ref<boolean> = ref(false);
+const paddingModel: Ref<number> = ref(0);
+
+const rectConfigM: ComputedRef<RectangleConfig[]> = computed(() => {
+  const boxes = props.boxes.map(box => ({
+    width: box.width,
+    height: box.height,
+    quantity: quantityModel.value[`${box.width}_${box.height}`] || 0,
+    allowRotation: allowRotationModel.value[`${box.width}_${box.height}`],
+  }));
+  return load(
+    props.binWidth,
+    props.binHeight,
+    paddingModel.value,
+    boxes,
+    centerLoading.value,
+  )
+})
 </script>
 
 <template>
   <div class="main">
+    <div class="konva">
+      <v-stage :config="konvaConfig">
+        <v-layer>
+          <v-rect
+            v-for="(conf, index) in rectConfigM"
+            :key="index"
+            :config="conf"
+          />
+        </v-layer>
+      </v-stage>
+    </div>
+    <div class="options">
+      <label>
+        Center Loading
+        <input
+          type="checkbox"
+          v-model="centerLoading"
+        />
+      </label>
+      <label>
+        Padding
+        <input
+          v-model.number="paddingModel"
+        />
+      </label>
+    </div>
     <div class="konva">
       <v-stage :config="konvaConfig">
         <v-layer>
@@ -292,6 +344,15 @@ const rectConfigsB: ComputedRef<RectangleConfig[]> = computed(() => {
           class="quantity"
           v-model.number="quantityModel[`${box.width}_${box.height}`]"
         />
+        <div class="pallet-options">
+          <div>
+            Allow Rotation
+          </div>
+          <input
+            type="checkbox"
+            v-model="allowRotationModel[`${box.width}_${box.height}`]"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -313,6 +374,7 @@ const rectConfigsB: ComputedRef<RectangleConfig[]> = computed(() => {
   justify-content: space-around;
   align-items: center;
   margin: 10px 0;
+  gap: 10px;
 }
 select {
   margin-right: 10px;
@@ -329,7 +391,13 @@ select {
   justify-content: space-between;
   align-items: center;
 }
+.pallet-options {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+}
 .quantity {
-  margin-left: 10px;
+  margin: 0 10px;
 }
 </style>

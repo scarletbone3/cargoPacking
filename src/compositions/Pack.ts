@@ -59,6 +59,7 @@ export const pack = (
       y: pack.y,
       fill: colors[`${pack.width}_${pack.height}`] || 'pink',
       stroke: 'grey',
+      strokeWidth: 1,
     }))
   }
   

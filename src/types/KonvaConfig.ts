@@ -10,4 +10,5 @@ export interface RectangleConfig {
   y: number;
   fill: string;
   stroke: string;
+  strokeWidth: number;
 }
